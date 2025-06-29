@@ -1,0 +1,76 @@
+trigger:
+- main
+
+pool:
+  vmImage: 'windows-latest'
+
+variables:
+  solution: '**/*.sln'
+  buildPlatform: 'Any CPU'
+  buildConfiguration: 'Release'
+
+stages:
+# ────────────────────────── Build & Deploy to Dev Slot ──────────────────────────
+- stage: BuildAndDeploy
+  displayName: 'Build & Deploy to Dev'
+  jobs:
+  - job: Build
+    displayName: 'Build & Test'
+    steps:
+    - task: NuGetToolInstaller@1
+    - task: NuGetCommand@2
+      inputs:
+        restoreSolution: '$(solution)'
+    - task: VSBuild@1
+      inputs:
+        solution: '$(solution)'
+        platform: '$(buildPlatform)'
+        configuration: '$(buildConfiguration)'
+        msbuildArgs: >
+          /p:DeployOnBuild=true
+          /p:WebPublishMethod=Package
+          /p:PackageAsSingleFile=true
+          /p:SkipInvalidConfigurations=true
+          /p:DesktopBuildPackageLocation="$(build.artifactStagingDirectory)\WebApp.zip"
+          /p:DeployIisAppPath="Default Web Site"
+    - task: VSTest@2
+      inputs:
+        platform: '$(buildPlatform)'
+        configuration: '$(buildConfiguration)'
+
+  - job: DeployToDev
+    displayName: 'Deploy to Dev Slot'
+    dependsOn: Build
+    steps:
+    - task: AzureWebApp@1
+      displayName: 'Deploy to Dev Slot'
+      inputs:
+        azureSubscription: 'Azure subscription 1'
+        appType: 'webApp'
+        appName: 'BugTrackerApi20250516235431'
+        deployToSlotOrASE: true
+        resourceGroupName: 'FinalProReRe20250306152958ResourceGroup'
+        slotName: 'dev'
+        package: '$(Build.ArtifactStagingDirectory)\WebApp.zip'
+
+# ────────────────────────── Swap to Production (Approval Required) ──────────────────────────
+- stage: SwapToProd
+  displayName: 'Swap Dev → Production'
+  dependsOn: BuildAndDeploy
+  jobs:
+  - deployment: SwapToProduction
+    displayName: 'Swap to Production'
+    environment: 'ProductionEnv'    # triggers pre-deployment approval
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: AzureAppServiceManage@0
+            displayName: 'Swap Slots'
+            inputs:
+              azureSubscription: 'Azure subscription 1'
+              action: 'Swap Slots'
+              WebAppName: 'BugTrackerApi20250516235431'
+              ResourceGroupName: 'FinalProReRe20250306152958ResourceGroup'
+              SourceSlot: 'dev'
+              SwapWithProduction: true
