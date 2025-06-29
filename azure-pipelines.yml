@@ -45,7 +45,7 @@ stages:
     - task: AzureWebApp@1
       displayName: 'Deploy to Dev Slot'
       inputs:
-        azureSubscription: 'Azure subscription 1'
+        azureSubscription: 'azuredevops-to-azureresource-service-connection'
         appType: 'webApp'
         appName: 'BugTrackerApi20250516235431'
         deployToSlotOrASE: true
@@ -68,7 +68,7 @@ stages:
           - task: AzureAppServiceManage@0
             displayName: 'Swap Slots'
             inputs:
-              azureSubscription: 'Azure subscription 1'
+              azureSubscription: 'azuredevops-to-azureresource-service-connection'
               action: 'Swap Slots'
               WebAppName: 'BugTrackerApi20250516235431'
               ResourceGroupName: 'FinalProReRe20250306152958ResourceGroup'
