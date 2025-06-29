@@ -47,6 +47,8 @@ stages:
     displayName: 'Deploy to Dev Slot'
     dependsOn: Build
     steps:
+    - download: current
+      artifact: drop
     - task: AzureWebApp@1
       displayName: 'Deploy to Dev Slot'
       inputs:
@@ -56,7 +58,7 @@ stages:
         deployToSlotOrASE: true
         resourceGroupName: 'FinalProReRe20250306152958ResourceGroup'
         slotName: 'dev'
-        package: '$(Build.ArtifactStagingDirectory)\WebApp.zip'
+        package: '$(Pipeline.Workspace)/drop/WebApp.zip'
 
 # ────────────────────────── Swap to Production (Approval Required) ──────────────────────────
 - stage: SwapToProd
