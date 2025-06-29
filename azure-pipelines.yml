@@ -37,6 +37,11 @@ stages:
       inputs:
         platform: '$(buildPlatform)'
         configuration: '$(buildConfiguration)'
+    - task: PublishPipelineArtifact@1
+      displayName: 'Publish WebApp.zip artifact'
+      inputs:
+        targetPath: '$(Build.ArtifactStagingDirectory)/WebApp.zip'
+        artifact: 'drop'
 
   - job: DeployToDev
     displayName: 'Deploy to Dev Slot'
