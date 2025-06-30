@@ -32,7 +32,7 @@ stages:
         configuration: '$(buildConfiguration)'
         msbuildArgs: >
           /p:DeployOnBuild=true
-          /p:WebPublishMethod=FileSystem          # ⬅️ MSDeploy package removed
+          /p:WebPublishMethod=FileSystem         
           /p:PublishProtocol=FileSystem
           /p:publishUrl=$(Build.ArtifactStagingDirectory)/publish
 
