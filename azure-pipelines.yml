@@ -14,13 +14,17 @@ stages:
 - stage: BuildAndDeploy
   displayName: 'Build & Deploy to Dev'
   jobs:
+  # -------- Build job --------
   - job: Build
     displayName: 'Build & Test'
     steps:
+    # Restore
     - task: NuGetToolInstaller@1
     - task: NuGetCommand@2
       inputs:
         restoreSolution: '$(solution)'
+
+    # Build **and publish to a file-system folder**
     - task: VSBuild@1
       inputs:
         solution: '$(solution)'
@@ -28,27 +32,41 @@ stages:
         configuration: '$(buildConfiguration)'
         msbuildArgs: >
           /p:DeployOnBuild=true
-          /p:WebPublishMethod=Package
-          /p:PackageAsSingleFile=true
-          /p:SkipInvalidConfigurations=true
-          /p:DesktopBuildPackageLocation="$(build.artifactStagingDirectory)/WebApp.zip"
-          /p:DeployIisAppPath="Default Web Site"
+          /p:WebPublishMethod=FileSystem          # ⬅️ MSDeploy package removed
+          /p:PublishProtocol=FileSystem
+          /p:publishUrl=$(Build.ArtifactStagingDirectory)/publish
+
+    # Unit tests (unchanged)
     - task: VSTest@2
       inputs:
         platform: '$(buildPlatform)'
         configuration: '$(buildConfiguration)'
+
+    # Zip the published output so Zip-Deploy can mount it
+    - task: ArchiveFiles@2
+      displayName: 'Archive publish folder to WebApp.zip'
+      inputs:
+        rootFolderOrFile: '$(Build.ArtifactStagingDirectory)/publish'
+        includeRootFolder: false
+        archiveType: 'zip'
+        archiveFile: '$(Build.ArtifactStagingDirectory)/WebApp.zip'
+        replaceExistingArchive: true
+
+    # Publish the ZIP as the pipeline artifact (same name/path as before)
     - task: PublishPipelineArtifact@1
       displayName: 'Publish WebApp.zip artifact'
       inputs:
         targetPath: '$(Build.ArtifactStagingDirectory)/WebApp.zip'
         artifact: 'drop'
 
+  # -------- Deploy job --------
   - job: DeployToDev
     displayName: 'Deploy to Dev Slot'
     dependsOn: Build
     steps:
     - download: current
       artifact: drop
+
     - task: AzureWebApp@1
       displayName: 'Deploy to Dev Slot'
       inputs:
@@ -59,6 +77,7 @@ stages:
         resourceGroupName: 'FinalProReRe20250306152958ResourceGroup'
         slotName: 'dev'
         package: '$(Pipeline.Workspace)/drop/WebApp.zip'
+        deploymentMethod: 'runFromPackage'        # ⬅️ zip-deploy / run-from-package
 
 # ────────────────────────── Swap to Production (Approval Required) ──────────────────────────
 - stage: SwapToProd
