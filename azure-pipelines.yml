@@ -72,7 +72,7 @@ stages:
       inputs:
         azureSubscription: 'azuredevops-to-azureresource-service-connection'
         appType: 'webApp'
-        appName: 'bugtrackerapi20250516235431-devtest'
+        appName: 'bugtrackerapi20250516235431'
         deployToSlotOrASE: true
         resourceGroupName: 'FinalProReRe20250306152958ResourceGroup'
         slotName: 'devtest'
@@ -98,5 +98,5 @@ stages:
               action: 'Swap Slots'
               WebAppName: 'BugTrackerApi20250516235431'
               ResourceGroupName: 'FinalProReRe20250306152958ResourceGroup'
-              SourceSlot: 'dev'
+              SourceSlot: 'devtest'
               SwapWithProduction: true
