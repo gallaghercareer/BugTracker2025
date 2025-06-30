@@ -72,10 +72,10 @@ stages:
       inputs:
         azureSubscription: 'azuredevops-to-azureresource-service-connection'
         appType: 'webApp'
-        appName: 'BugTrackerApi20250516235431'
+        appName: 'bugtrackerapi20250516235431-devtest'
         deployToSlotOrASE: true
         resourceGroupName: 'FinalProReRe20250306152958ResourceGroup'
-        slotName: 'dev'
+        slotName: 'devtest'
         package: '$(Pipeline.Workspace)/drop/WebApp.zip'
         deploymentMethod: 'runFromPackage'        # ⬅️ zip-deploy / run-from-package
 
