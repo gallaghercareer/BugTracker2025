@@ -74,8 +74,8 @@ stages:
         deployToSlotOrASE: true
         resourceGroupName: 'FinalProReRe20250306152958ResourceGroup'
         slotName: 'devtest'
-        package: '$(Pipeline.Workspace)/drop/WebApp.zip'   # ← deploy the ZIP
-        deploymentMethod: 'runFromPackage'                # keep run-from-package
+        package: '$(Pipeline.Workspace)/drop/WebApp.zip'  
+        deploymentMethod: 'runFromPackage'                
 
 # ────────────────────────── Swap to Production (Approval Required) ──────────────────────────
 - stage: SwapToProd
