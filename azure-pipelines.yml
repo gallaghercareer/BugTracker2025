@@ -10,9 +10,11 @@ variables:
   buildConfiguration: 'Release'
 
 stages:
+# ────────────────────────── Build & Deploy to Dev Slot ──────────────────────────
 - stage: BuildAndDeploy
   displayName: 'Build & Deploy to Dev'
   jobs:
+  # -------- Build job --------
   - job: Build
     displayName: 'Build & Test'
     steps:
@@ -38,33 +40,30 @@ stages:
         platform: '$(buildPlatform)'
         configuration: '$(buildConfiguration)'
 
+    # Zip the published output
     - task: ArchiveFiles@2
       displayName: 'Archive publish folder to WebApp.zip'
       inputs:
         rootFolderOrFile: '$(Build.ArtifactStagingDirectory)/publish'
-        includeRootFolder: false
+        includeRootFolder: false          # zip only the contents
         archiveType: 'zip'
         archiveFile: '$(Build.ArtifactStagingDirectory)/WebApp.zip'
         replaceExistingArchive: true
 
+    # Publish the ZIP as an artifact
     - task: PublishPipelineArtifact@1
       displayName: 'Publish WebApp.zip artifact'
       inputs:
         targetPath: '$(Build.ArtifactStagingDirectory)/WebApp.zip'
         artifact: 'drop'
 
+  # -------- Deploy job --------
   - job: DeployToDev
     displayName: 'Deploy to Dev Slot'
     dependsOn: Build
     steps:
     - download: current
       artifact: drop
-
-    - task: ExtractFiles@1
-      displayName: 'Unzip publish output'
-      inputs:
-        archiveFilePatterns: '$(Pipeline.Workspace)/drop/WebApp.zip'
-        destinationFolder: '$(Pipeline.Workspace)/drop/publish'
 
     - task: AzureWebApp@1
       displayName: 'Deploy to Dev Slot'
@@ -75,9 +74,10 @@ stages:
         deployToSlotOrASE: true
         resourceGroupName: 'FinalProReRe20250306152958ResourceGroup'
         slotName: 'devtest'
-        package: '$(Pipeline.Workspace)/drop/publish'
-        deploymentMethod: 'auto'
+        package: '$(Pipeline.Workspace)/drop/WebApp.zip'   # ← deploy the ZIP
+        deploymentMethod: 'runFromPackage'                # keep run-from-package
 
+# ────────────────────────── Swap to Production (Approval Required) ──────────────────────────
 - stage: SwapToProd
   displayName: 'Swap Dev → Production'
   dependsOn: BuildAndDeploy
