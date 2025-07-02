@@ -44,6 +44,7 @@ steps:
     inputs:
       projects: $(project)
       command: 'publish'
+      azureSubscription: 'azuredevops-to-azureresource-service-connection'
       publishWebProjects: true
       arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory))'
       zipAfterPublish: false
