@@ -15,12 +15,14 @@ variables:
   buildConfiguration: 'Release'
 
 steps: 
+
+#First STep Not Needed If Not Containerized & Self-hosted Agent
 #Install and Add to PATH the .NET 8 SDK
-  - task: UseDotNet@2
-    displayName: 'Install .NET 9 SDK'
-    inputs:
-      packageType: 'sdk'
-      version: '9.0.200'
+#  - task: UseDotNet@2
+#    displayName: 'Install .NET 9 SDK'
+#    inputs:
+#      packageType: 'sdk'
+#      version: '9.0.200'
 
 #Install Nuget Tool
   - task: NuGetToolInstaller@1
