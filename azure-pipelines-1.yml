@@ -1,0 +1,58 @@
+# Build pipeline
+
+trigger:
+  branches:
+    include:
+      - main
+    
+pool:
+  name: 'Default'
+
+variables:
+  solution: '**/BugTracker.sln'
+  buildPlatform: 'Any CPU'  
+  project: 'BugTracker.csproj'
+
+steps: 
+
+#Install Nuget Tool
+  - task: NuGetToolInstaller@1
+    name: 'NugetToolInstaller'
+    displayName: 'Install Nuget Tools'
+
+#Restore Nuget references    
+  - task: NuGetCommand@2
+    name: 'NugetRestore'
+    displayName: 'Restore Nuget Packages'
+    inputs:
+      command: 'restore'
+      restoreSolution: '$(solution)'
+      feedsToUse: 'select'
+#Test building solution    
+  - task: DotNetCoreCLI@2
+    name: 'Tests'
+    displayName: 'Run Tests'
+    inputs:
+      command: 'test'
+      projects: '$(solution)'
+      arguments: '--configuration $(buildConfiguration)'
+
+#Publish project for Artifacts
+  - task: DotNetCoreCLI@2
+    name: 'Publish'
+    displayName: 'Publish'
+    inputs:
+      projects: $(project)
+      command: 'publish'
+      publishWebProjects: true
+      arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory))'
+      zipAfterPublish: false
+
+#Publish Artifact
+  - task: PublishBuildArtifacts@1
+    name: 'PublishBuildArtifacts'
+    displayName: 'Publish Build Artifacts'
+    inputs:
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+      ArtifactName: 'AzureBugTrackerTestProject'
+      publishLocation: 'Container'
