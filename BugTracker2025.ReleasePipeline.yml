@@ -1,10 +1,7 @@
-# Starter pipeline
-# Start with a minimal pipeline that you can customize to build and deploy your code.
-# Add steps that build, run tests, deploy, and more:
-# https://aka.ms/yaml
-
+# Release pipeline for Swap to Production only
 trigger:
   - none
+
 pool:
   name: 'Default'
 
@@ -16,48 +13,27 @@ resources:
   - pipeline: 'buildPipeline'
     source: BugTracker2025-BuildPipeline
     branch: main
-    trigger: none
-    
+    trigger: true
+
 stages:
-  - stage: DeployDevSlot
-    displayName: 'Deploy pipeline'
-  
-    jobs:
-    - job: DeployDevSlotJob
-      displayName: 'Start Job To Deploy Dev Website To Dev Slot'
-    
-      steps: 
-        - download: buildPipeline
-          artifact: AzureBugTrackerTestProject
-        - task: AzureWebApp@1
-          displayName: 'Deploy ZIP to Devtest slot'
-          inputs:
-            azureSubscription: 'azuredevops-to-azureresource-service-connection'
-            appType: webApp
-            appName: 'bugtrackerapi20250516235431'
-            resourceGroupName: 'FinalProReRe20250306152958ResourceGroup'
-            deployToSlotOrASE: true
-            slotName: 'devtest'
-            package: '$(Pipeline.Workspace)/buildPipeline/AzureBugTrackerTestProject/**/*.zip'
-        
-# ─────────── Stage 2: Swap devtest → production ───────────
-  - stage: SwapToProduction
-    displayName: 'Swap Devtest Slot into Production'
-    dependsOn: DeployDevSlot
-    condition: succeeded()
-    jobs:
-    - deployment: SwapSlot
-      displayName: 'Swap devtest ⇄ production'
-      environment: 'BugTracker WebApp Service'     # your approval-only environment
-      strategy:
-        runOnce:
-          deploy:
-            steps:
-            - task: AzureAppServiceManage@0
-              displayName: 'Swap Devtest into Production'
-              inputs:
-                azureSubscription: 'azuredevops-to-azureresource-service-connection'
-                WebAppName: 'bugtrackerapi20250516235431'
-                ResourceGroupName: 'FinalProReRe20250306152958ResourceGroup'
-                SourceSlot: 'devtest'
-                SwapWithProduction: true   
+# Swap Devtest slot into Production
+- stage: SwapToProduction
+  displayName: Swap Devtest Slot into Production
+  dependsOn: []
+  condition: succeeded()
+  jobs:
+  - deployment: SwapSlot
+    displayName: Swap Devtest into Production
+    environment: 'BugTracker WebApp Service'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: AzureAppServiceManage@0
+            displayName: Swap Devtest into Production
+            inputs:
+              azureSubscription: 'azuredevops-to-azureresource-service-connection'
+              WebAppName: 'bugtrackerapi20250516235431'
+              ResourceGroupName: 'FinalProReRe20250306152958ResourceGroup'
+              SourceSlot: devtest
+              SwapWithProduction: true
