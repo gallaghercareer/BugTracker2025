@@ -19,11 +19,11 @@ resources:
     trigger: none
     
 stages:
-  - stage:
+  - stage: DeployDevSlot
     displayName: 'Deploy pipeline'
   
     jobs:
-    - job: DeployDevSlot
+    - job: DeployDevSlotJob
       displayName: 'Start Job To Deploy Dev Website To Dev Slot'
     
       steps: 
@@ -40,4 +40,24 @@ stages:
             slotName: 'devtest'
             package: '$(Pipeline.Workspace)/buildPipeline/AzureBugTrackerTestProject/**/*.zip'
         
-   
+# ─────────── Stage 2: Swap devtest → production ───────────
+  - stage: SwapToProduction
+    displayName: 'Swap Devtest Slot into Production'
+    dependsOn: DeployDevSlot
+    condition: succeeded()
+    jobs:
+    - deployment: SwapSlot
+      displayName: 'Swap devtest ⇄ production'
+      environment: 'BugTracker WebApp Service'     # your approval-only environment
+      strategy:
+        runOnce:
+          deploy:
+            steps:
+            - task: AzureAppServiceManage@0
+              displayName: 'Swap Devtest into Production'
+              inputs:
+                azureSubscription: 'azuredevops-to-azureresource-service-connection'
+                WebAppName: 'bugtrackerapi20250516235431'
+                ResourceGroupName: 'FinalProReRe20250306152958ResourceGroup'
+                SourceSlot: 'devtest'
+                SwapWithProduction: true   
