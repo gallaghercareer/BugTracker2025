@@ -38,6 +38,6 @@ stages:
             resourceGroupName: 'FinalProReRe20250306152958ResourceGroup'
             deployToSlotOrASE: true
             slotName: 'devtest'
-            package: '$(Pipeline.Workspace)/AzureBugTrackerTestProject/**/*.zip'
+            package: '$(Pipeline.Workspace)/buildPipeline/AzureBugTrackerTestProject/**/*.zip'
         
    
