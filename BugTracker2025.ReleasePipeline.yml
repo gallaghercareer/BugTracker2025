@@ -2,3 +2,42 @@
 # Start with a minimal pipeline that you can customize to build and deploy your code.
 # Add steps that build, run tests, deploy, and more:
 # https://aka.ms/yaml
+
+trigger:
+  - none
+pool:
+  name: 'Default'
+
+variables:
+  projectFile: 'projectFile'
+
+resources:
+  pipelines:
+  - pipeline: 'buildPipeline'
+    source: BugTracker2025-BuildPipeline
+    branch: main
+    trigger: none
+    
+stages:
+  - stage:
+    displayName: 'Deploy pipeline'
+  
+    jobs:
+    - job: DeployDevSlot
+      displayName: 'Start Job To Deploy Dev Website To Dev Slot'
+    
+      steps: 
+        - download: buildPipeline
+          artifact: AzureBugTrackerTestProject
+        - task: AzureWebApp@1
+          displayName: 'Deploy ZIP to Devtest slot'
+          inputs:
+            azureSubscription: 'azuredevops-to-azureresource-service-connection'
+            appType: webApp
+            appName: 'bugtrackerapi20250516235431'
+            resourceGroupName: 'FinalProReRe20250306152958ResourceGroup'
+            deployToSlotOrASE: true
+            slotName: 'devtest'
+            package: '$(Pipeline.Workspace)/AzureBugTrackerTestProject/**/*.zip'
+        
+   
