@@ -1,0 +1,62 @@
+﻿@model BugTracker.ViewModels.MultipleTicketsModel
+
+@{
+    ViewData["Title"] = "AdminIndex";
+}
+
+<!-- HERO ADD TICKET BUTTON -->
+<div id="buttonadd" class="mb-4">
+    <a asp-controller="Home"
+       asp-action="AddTicketForm"
+       class="btn btn-primary">
+        Add Ticket
+    </a>
+</div>
+
+<!-- TABLE -->
+<div id="tablediv">
+    <table id="tickets" class="stripe table table-bordered table-hover">
+        <thead>
+            <tr>
+                <th>Ticket ID</th>
+                <th>Assigned To</th>
+                <th>Date Created</th>
+                <th>Resolved</th>
+            </tr>
+        </thead>
+    </table>
+</div>
+
+@section Scripts {
+    <!-- make sure these paths match whatever you installed via LibMan/npm -->
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/lib/datatables.net/js/jquery.dataTables.min.js"></script>
+    <script src="~/lib/datatables.net-dt/js/dataTables.dataTables.min.js"></script>
+
+    <script>
+        $(function () {
+            loadData();
+        });
+
+        function loadData() {
+            $.getJSON('/api/tickets', function (tickets) {
+                $('#tickets').DataTable({
+                    data: tickets,
+                    paging: false,
+                    columns: [
+                        {
+                            data: 'id',
+                            render: function (data) {
+                                // Tag Helpers can't be used inside JS, so build URL manually
+                                return `<a href="/Home/Viewticket?ticketid=${data}">${data}</a>`;
+                            }
+                        },
+                        { data: 'applicationUser.userName' },
+                        { data: 'date' },
+                        { data: 'resolved' }
+                    ]
+                });
+            });
+        }
+    </script>}

@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using BugTracker.Data.Context;
+using BugTracker.Data;
+using BugTracker.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,9 +13,11 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-//DBContext
-builder.Services.AddDbContext<BugTrackerContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+//wire database persistence layer
+builder.Services.AddPersistence(builder.Configuration);
+
+//wire services business domain logic
+builder.Services.AddDomainServices();
 
 
 var app = builder.Build();

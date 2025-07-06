@@ -6,11 +6,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+
 namespace BugTracker.Data.Context
 {
-   public class BugTrackerContext(DbContextOptions<BugTrackerContext> options) : DbContext(options)
-    {
-        DbSet<Ticket> Tickets { get; set; }
 
+    public class BugTrackerContext : DbContext
+    {
+        public BugTrackerContext(DbContextOptions<BugTrackerContext> options)
+            : base(options) { }
+
+        public DbSet<Ticket> Tickets { get; set; } = null!;
+        public DbSet<Comment> Comments { get; set; } = null!;
     }
 }

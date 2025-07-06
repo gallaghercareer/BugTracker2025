@@ -2,9 +2,13 @@ using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using BugTracker.Models;
 using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
+using BugTracker.Core.DTO;
+
 
 namespace BugTracker.Controllers;
 
+[Authorize]
 public class HomeController : Controller
 {
     private readonly ILogger<HomeController> _logger;
@@ -19,11 +23,44 @@ public class HomeController : Controller
 
     public IActionResult Index()
     {
+        // Azure AD emits roles in a claim of type "roles"
+        var roles = User.FindAll("roles").Select(c => c.Value);
+
+        if (roles.Contains("Admin"))
+            return RedirectToAction("Index", "AdminIndex");
+
+        if (roles.Contains("Support"))
+            return RedirectToAction("Index", "SupportIndex");
+       
+        if (roles.Contains("Customer"))
+            return RedirectToAction("Index", "CustomerIndex");
+
+        return View();
+    }
+
+    [HttpPost]
+    public IActionResult CreateTicket(CreateTicketDto model)
+    {
+    
+    }
+    [Authorize(Roles = "Admin")]
+    public IActionResult Privacy()
+    {
         return View();
     }
 
     [Authorize(Roles = "Admin")]
-    public IActionResult Privacy()
+    public IActionResult AdminIndex()
+    {
+        return View();
+    }
+    [Authorize(Roles = "Support")]
+    public IActionResult SupportIndex()
+    {
+        return View();
+    }
+    [Authorize(Roles = "Customer")]
+    public IActionResult CustomerIndex()
     {
         return View();
     }

@@ -1,6 +1,8 @@
 ﻿using BugTracker.Core.Enum;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,13 +12,18 @@ namespace BugTracker.Core.Models
     public class Ticket
     {
         public int Id { get; set; }
-        public TicketCategory Category { get; set; }
-        public string Description { get; set; } = string.Empty;
-        public TicketStatus Status { get; set; }
+        
+        [Required]
+        public string UserId { get; set; } = string.Empty;
 
-        //TicketCreator
+        public DateTime Date { get; set; }
 
-        //TicketTechnicain
+        public bool Resolved { get; set; }
+
+        [Required]
+        public string Instructions { get; set; } = string.Empty;
+
+      
 
     }
 }
