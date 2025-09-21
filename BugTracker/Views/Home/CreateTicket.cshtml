@@ -1,0 +1,35 @@
+﻿@model BugTracker.Core.DTO.CreateTicketDto
+
+@{
+    ViewData["Title"] = "Create Ticket";
+}
+
+<h2>Create Ticket</h2>
+
+<form asp-action="CreateTicket" method="post">
+    <div>
+        <label asp-for="Date"></label>
+        <input asp-for="Date" type="datetime-local" />
+    </div>
+    <div>
+        <label asp-for="Instructions"></label>
+        <textarea asp-for="Instructions"></textarea>
+    </div>
+    <div>
+        <label>
+            <input asp-for="Resolved" type="checkbox" />
+            Resolved
+        </label>
+    </div>
+    <button type="submit">Create Ticket</button>
+</form>
+
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="text-danger">
+        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+        {
+            <div>@error.ErrorMessage</div>
+        }
+    </div>
+}
